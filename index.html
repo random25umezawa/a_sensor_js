@@ -1,0 +1,179 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!--link rel="stylesheet" href="../style/main.css"!-->
+	<title>加速度ツール</title>
+	<style>
+	*{
+		font-size: 50px;
+	}
+	td{
+		width: 25%;
+		text-align: right;
+	}
+	</style>
+</head>
+<body>
+	<button id="timerbutton" style="width:400px; height:80px;">計測開始</button><br>
+	x:<span id="x"> 0.000</span><br>
+	y:<span id="y"> 0.000</span><br>
+	z:<span id="z"> 0.000</span><br>
+	<button onclick="download();" style="width:300px; height:80px;">csv取得</button>
+	filename:<input id="filename">
+	<div id="canvas_div" style="overflow-x:scroll; width:100%;">
+		<canvas id="canvas" style="width:500px; height:300px;"></canvas>
+	</div>
+	<table border="1">
+		<tr style="text-align:center;">
+			<td>time</td>
+			<td>x</td>
+			<td>y</td>
+			<td>z</td>
+		</tr>
+		<tbody id="result_table">
+		</tbody>
+	</table>
+</body>
+<script>
+
+var x_dom,y_dom,z_dom;
+var time = (+new Date());
+var startTime = (+new Date());
+var min_deltatime = 5;
+var sensor_flag = false;
+var render_realtime_flag = true;
+var fix_num = 3;
+
+var timerbutton;
+var result_table;
+var canvas_div;
+var canvas_div_width;
+
+var canvas;
+var g;
+var canvas_width = 1200;
+var canvas_height = 300;
+var canvas_half_height = canvas_height/4;
+var width_per_millisecond = 0.05;
+var canvas_height_rate = 0.1;
+
+var result = [];
+
+window.onload = function() {
+	x_dom = document.getElementById("x");
+	y_dom = document.getElementById("y");
+	z_dom = document.getElementById("z");
+	timerbutton = document.getElementById("timerbutton");
+	result_table = document.getElementById("result_table");
+	canvas_div = document.getElementById("canvas_div");
+	canvas_div_width = canvas_div.style.width;
+	canvas = document.getElementById("canvas");
+	canvas.style.width=canvas_width+"px";
+	canvas.style.height=canvas_height+"px";
+	g = canvas.getContext("2d");
+
+	timerbutton.onclick = function() {
+		if(sensor_flag) {
+			timerbutton.innerHTML = "計測開始";
+			timerEnd();
+		}else {
+			timerbutton.innerHTML = "計測終了";
+			timerStart();
+		}
+	}
+
+	window.addEventListener("devicemotion", function(e){
+		if(sensor_flag) {
+			var newTime = (+new Date());
+			if(newTime-time>min_deltatime) {
+				var x = fixNumber(e.acceleration.x);
+				var y = fixNumber(e.acceleration.y);
+				var z = fixNumber(e.acceleration.z);
+				var allTime = newTime-startTime;
+				if(render_realtime_flag) {
+					x_dom.innerHTML = x;
+					y_dom.innerHTML = y;
+					z_dom.innerHTML = z;
+					canvasDraw();
+				}
+				time = newTime;
+				result.push([fixNumber(allTime/1000),x,y,z]);
+			}
+		}
+	});
+};
+
+function canvasDraw() {
+	g.fillStyle = "#fff";
+	g.fillRect(0,0,canvas_width,canvas_height);
+	var _maxtime = result[result.length-1][0]*1000*width_per_millisecond;
+	if(canvas_width<_maxtime) {
+		canvas.style.width = _maxtime+"px";
+	}
+	graphDraw(1,"#f00",0);
+	graphDraw(2,"#0f0",0);
+	graphDraw(3,"#00f",0);
+
+	var scroll = canvas_width-canvas_div_width;
+	if(scroll>0) canvas_div.scrollLeft = scroll;
+}
+
+function graphDraw(_index, _color, _start=0) {
+	g.strokeStyle = _color;
+	var _startTime = result[_start][0];
+	g.beginPath();
+	g.moveTo(0,canvas_half_height);
+	for(var i = _start+1; i < result.length; i++) {
+		g.lineTo((result[i][0]-_startTime)*1000*width_per_millisecond,canvas_half_height+canvas_half_height*result[i][_index]);
+	}
+	g.stroke();
+}
+
+function timerStart() {
+	result = [[0,0,0,0]];
+	time = (+new Date());
+	startTime = (+new Date());
+	sensor_flag = true;
+}
+
+function timerEnd() {
+	sensor_flag = false;
+	result_table.innerHTML = "";
+	for(var i = 0; i < result.length; i++) {
+		result_table.innerHTML += make_dom(result[i]);
+	}
+}
+
+function download() {
+	var filename = document.getElementById("filename").value;
+	var outputText = "time,x,y,z\n";
+	for(var i = 0; i < result.length; i++) {
+		outputText += `${result[i][0]},${result[i][1]},${result[i][2]},${result[i][3]}\n`;
+	}
+	var blob = new Blob([outputText],{"type":"text/plain"});
+	var a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.targer = '_blank';
+	a.download = filename+'.csv';
+	a.click();
+}
+
+function make_dom(_arr) {
+	return `
+		<tr>
+			<td>${_arr[0]}</td>
+			<td>${_arr[1]}</td>
+			<td>${_arr[2]}</td>
+			<td>${_arr[3]}</td>
+		</tr>
+	`
+}
+
+function fixNumber(_num) {
+	var num = new Number(_num).toFixed(fix_num);
+	//if(num>=0) num = " "+num;
+	return num;
+}
+
+</script>
+</html>
