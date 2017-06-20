@@ -21,7 +21,7 @@
 	<button onclick="download();" style="width:300px; height:80px;">csv取得</button>
 	filename:<input id="filename">
 	<div id="canvas_div" style="overflow-x:scroll; width:100%;">
-		<canvas id="canvas" style="width:500px; height:300px;"></canvas>
+		<canvas id="canvas" width="500" height="300"></canvas>
 	</div>
 	<table border="1">
 		<tr style="text-align:center;">
@@ -51,11 +51,11 @@ var canvas_div_width;
 
 var canvas;
 var g;
-var canvas_width = 1200;
+var canvas_width = 0;
 var canvas_height = 300;
 var canvas_half_height = canvas_height/4;
-var width_per_millisecond = 0.05;
-var canvas_height_rate = 0.1;
+var width_per_millisecond = 0.25;
+var canvas_height_rate = 0.05;
 
 var result = [];
 
@@ -66,10 +66,10 @@ window.onload = function() {
 	timerbutton = document.getElementById("timerbutton");
 	result_table = document.getElementById("result_table");
 	canvas_div = document.getElementById("canvas_div");
-	canvas_div_width = canvas_div.style.width;
+	canvas_div_width = canvas_div.clientWidth;
 	canvas = document.getElementById("canvas");
-	canvas.style.width=canvas_width+"px";
-	canvas.style.height=canvas_height+"px";
+	canvas.width=canvas_width;
+	canvas.height=canvas_height;
 	g = canvas.getContext("2d");
 
 	timerbutton.onclick = function() {
@@ -108,7 +108,8 @@ function canvasDraw() {
 	g.fillRect(0,0,canvas_width,canvas_height);
 	var _maxtime = result[result.length-1][0]*1000*width_per_millisecond;
 	if(canvas_width<_maxtime) {
-		canvas.style.width = _maxtime+"px";
+		canvas.width = _maxtime;
+		canvas_width = _maxtime;
 	}
 	graphDraw(1,"#f00",0);
 	graphDraw(2,"#0f0",0);
@@ -131,6 +132,8 @@ function graphDraw(_index, _color, _start=0) {
 
 function timerStart() {
 	result = [[0,0,0,0]];
+	canvas_width = 0;
+	canvas.width = 0;
 	time = (+new Date());
 	startTime = (+new Date());
 	sensor_flag = true;
