@@ -20,9 +20,11 @@
 	z:<span id="z"> 0.000</span><br>
 	<button onclick="download();" style="width:300px; height:80px;">csv取得</button>
 	filename:<input id="filename">
-	<div id="canvas_div" style="overflow-x:scroll; width:100%;">
+	<div id="canvas_div" style="overflow-x:scroll; width:80%;">
 		<canvas id="canvas" width="500" height="300"></canvas>
 	</div>
+	<div id="progress_message_div">DOM形成中...</div>
+	<progress id="dom_progress"></progress>
 	<table border="1">
 		<tr style="text-align:center;">
 			<td>time</td>
@@ -49,6 +51,9 @@ var result_table;
 var canvas_div;
 var canvas_div_width;
 
+var progress_message_div;
+var dom_progress;
+
 var canvas;
 var g;
 var canvas_width = 0;
@@ -70,6 +75,10 @@ window.onload = function() {
 	canvas = document.getElementById("canvas");
 	canvas.width=canvas_width;
 	canvas.height=canvas_height;
+	progress_message_div = document.getElementById("progress_message_div");
+	dom_progress = document.getElementById("dom_progress");
+	progress_message_div.style.visibility = "hidden";
+	dom_progress.style.visibility = "hidden";
 	g = canvas.getContext("2d");
 
 	timerbutton.onclick = function() {
@@ -132,6 +141,7 @@ function graphDraw(_index, _color, _start=0) {
 
 function timerStart() {
 	result = [[0,0,0,0]];
+	result_table.innerHTML = "";
 	canvas_width = 0;
 	canvas.width = 0;
 	time = (+new Date());
@@ -141,9 +151,21 @@ function timerStart() {
 
 function timerEnd() {
 	sensor_flag = false;
-	result_table.innerHTML = "";
-	for(var i = 0; i < result.length; i++) {
-		result_table.innerHTML += make_dom(result[i]);
+	progress_message_div.style.visibility = "visible";
+	dom_progress.style.visibility = "visible";
+	dom_progress.max = result.length;
+	dom_progress.value = 0;
+	make_table(0);
+}
+
+function make_table(start) {
+	if(result.length>start) {
+		result_table.innerHTML += make_dom(result[start]);
+		dom_progress.value = start;
+		setTimeout("make_table("+(start+1)+")",1);
+	}else {
+		progress_message_div.style.visibility = "hidden";
+		dom_progress.style.visibility = "hidden";
 	}
 }
 
