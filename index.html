@@ -11,6 +11,11 @@
 		width: 25%;
 		text-align: right;
 	}
+	.func{
+		border:1px solid #bbb;
+		padding: 5px;
+		margin: 5px;
+	}
 	</style>
 </head>
 <body>
@@ -18,8 +23,10 @@
 	x:<span id="span_x"> 0.000</span><br>
 	y:<span id="span_y"> 0.000</span><br>
 	z:<span id="span_z"> 0.000</span><br>
-	<button onclick="download();" style="width:300px; height:80px;">csv取得</button>
-	filename:<input id="filename">
+	<div class="func">
+		<button onclick="download();" style="width:300px; height:80px;">csv取得</button><br>
+		filename:<input id="filename" style="width:12em;">
+	</div>
 	<div id="div_canvas" style="overflow-x:scroll; width:80%;">
 		<canvas id="canvas" width="500" height="300"></canvas>
 	</div>
@@ -123,9 +130,9 @@ function canvasDraw() {
 
 	//大きさ調整
 	var _maxlength = result[result.length-1][0]*1000*width_per_millisecond;
-	if(canvas_width<_maxtime) {
-		canvas.width = _maxtime;
-		canvas_width = _maxtime;
+	if(canvas_width<_maxlength) {
+		canvas.width = _maxlength;
+		canvas_width = _maxlength;
 	}
 	graphDraw(1,"#f00",0);
 	graphDraw(2,"#0f0",0);
@@ -179,6 +186,7 @@ function make_table(start) {
 
 function download() {
 	var filename = document.getElementById("filename").value;
+	if(filename=="") filename = "sensor_data";
 	var outputText = "time,x,y,z\n";
 	for(var i = 0; i < result.length; i++) {
 		outputText += `${result[i][0]},${result[i][1]},${result[i][2]},${result[i][3]}\n`;
