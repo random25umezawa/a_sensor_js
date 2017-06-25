@@ -15,15 +15,15 @@
 </head>
 <body>
 	<button id="timerbutton" style="width:400px; height:80px;">計測開始</button><br>
-	x:<span id="x"> 0.000</span><br>
-	y:<span id="y"> 0.000</span><br>
-	z:<span id="z"> 0.000</span><br>
+	x:<span id="span_x"> 0.000</span><br>
+	y:<span id="span_y"> 0.000</span><br>
+	z:<span id="span_z"> 0.000</span><br>
 	<button onclick="download();" style="width:300px; height:80px;">csv取得</button>
 	filename:<input id="filename">
-	<div id="canvas_div" style="overflow-x:scroll; width:80%;">
+	<div id="div_canvas" style="overflow-x:scroll; width:80%;">
 		<canvas id="canvas" width="500" height="300"></canvas>
 	</div>
-	<div id="progress_message_div">DOM形成中...</div>
+	<div id="div_progress_message">DOM形成中...</div>
 	<progress id="dom_progress"></progress>
 	<table border="1">
 		<tr style="text-align:center;">
@@ -32,52 +32,56 @@
 			<td>y</td>
 			<td>z</td>
 		</tr>
-		<tbody id="result_table">
+		<tbody id="table_result">
 		</tbody>
 	</table>
 </body>
 <script>
-
-var x_dom,y_dom,z_dom;
-var time = (+new Date());
-var startTime = (+new Date());
-var min_deltatime = 5;
-var sensor_flag = false;
-var render_realtime_flag = true;
-var fix_num = 3;
-
+//各種dom
+var span_x,span_y,span_z;
 var timerbutton;
-var result_table;
-var canvas_div;
-var canvas_div_width;
-
-var progress_message_div;
+var table_result;
+var div_progress_message;
 var dom_progress;
 
+//各種設定値
+var min_deltatime = 5;	//これより短いdtでのサンプリング値を無視する(ms)
+var render_realtime_flag = true;	//計測中にグラフ描画や値表示をするか
+var render_aftersensing = true;	//計測終了後に結果をテーブルに表示するか
+var fix_num = 3;	//小数以下何桁まで表示するか
+
+//一時処理用
+var sensor_flag = false;	//今計測中か
+var time = (+new Date());	//計測中のタイム
+var startTime = (+new Date());	//計測開始時間
+var result = [];	//計測値格納
+
+//canvas系
 var canvas;
 var g;
+var div_canvas;
+var div_canvas_width;	//canvas自体を囲っているdivの長さ(画面幅基準で割合指定されていて,自動スクロール処理に使う)
 var canvas_width = 0;
 var canvas_height = 300;
-var canvas_half_height = canvas_height/4;
-var width_per_millisecond = 0.25;
-var canvas_height_rate = 0.05;
+var canvas_half_height = canvas_height/2;
+var width_per_millisecond = 0.25;	//１秒に(1000*この値)pxグラフが進む
+var canvas_height_rate = 0.05;	//(1/この値)までの加速度値をはみ出さずに表示できる
 
-var result = [];
 
 window.onload = function() {
-	x_dom = document.getElementById("x");
-	y_dom = document.getElementById("y");
-	z_dom = document.getElementById("z");
+	span_x = document.getElementById("span_x");
+	span_y = document.getElementById("span_y");
+	span_z = document.getElementById("span_z");
 	timerbutton = document.getElementById("timerbutton");
-	result_table = document.getElementById("result_table");
-	canvas_div = document.getElementById("canvas_div");
-	canvas_div_width = canvas_div.clientWidth;
+	table_result = document.getElementById("table_result");
+	div_canvas = document.getElementById("div_canvas");
+	div_canvas_width = div_canvas.clientWidth;
 	canvas = document.getElementById("canvas");
 	canvas.width=canvas_width;
 	canvas.height=canvas_height;
-	progress_message_div = document.getElementById("progress_message_div");
+	div_progress_message = document.getElementById("div_progress_message");
 	dom_progress = document.getElementById("dom_progress");
-	progress_message_div.style.visibility = "hidden";
+	div_progress_message.style.visibility = "hidden";
 	dom_progress.style.visibility = "hidden";
 	g = canvas.getContext("2d");
 
@@ -100,9 +104,9 @@ window.onload = function() {
 				var z = fixNumber(e.acceleration.z);
 				var allTime = newTime-startTime;
 				if(render_realtime_flag) {
-					x_dom.innerHTML = x;
-					y_dom.innerHTML = y;
-					z_dom.innerHTML = z;
+					span_x.innerHTML = x;
+					span_y.innerHTML = y;
+					span_z.innerHTML = z;
 					canvasDraw();
 				}
 				time = newTime;
@@ -113,9 +117,12 @@ window.onload = function() {
 };
 
 function canvasDraw() {
+	//初期化
 	g.fillStyle = "#fff";
 	g.fillRect(0,0,canvas_width,canvas_height);
-	var _maxtime = result[result.length-1][0]*1000*width_per_millisecond;
+
+	//大きさ調整
+	var _maxlength = result[result.length-1][0]*1000*width_per_millisecond;
 	if(canvas_width<_maxtime) {
 		canvas.width = _maxtime;
 		canvas_width = _maxtime;
@@ -124,8 +131,9 @@ function canvasDraw() {
 	graphDraw(2,"#0f0",0);
 	graphDraw(3,"#00f",0);
 
-	var scroll = canvas_width-canvas_div_width;
-	if(scroll>0) canvas_div.scrollLeft = scroll;
+	//自動スクロール
+	var scroll = canvas_width-div_canvas_width;
+	if(scroll>0) div_canvas.scrollLeft = scroll;
 }
 
 function graphDraw(_index, _color, _start=0) {
@@ -141,7 +149,7 @@ function graphDraw(_index, _color, _start=0) {
 
 function timerStart() {
 	result = [[0,0,0,0]];
-	result_table.innerHTML = "";
+	table_result.innerHTML = "";
 	canvas_width = 0;
 	canvas.width = 0;
 	time = (+new Date());
@@ -151,20 +159,20 @@ function timerStart() {
 
 function timerEnd() {
 	sensor_flag = false;
-	progress_message_div.style.visibility = "visible";
+	div_progress_message.style.visibility = "visible";
 	dom_progress.style.visibility = "visible";
 	dom_progress.max = result.length;
 	dom_progress.value = 0;
-	make_table(0);
+	if(render_aftersensing) make_table(0);
 }
 
 function make_table(start) {
 	if(result.length>start) {
-		result_table.innerHTML += make_dom(result[start]);
+		table_result.innerHTML += make_dom(result[start]);
 		dom_progress.value = start;
 		setTimeout("make_table("+(start+1)+")",1);
 	}else {
-		progress_message_div.style.visibility = "hidden";
+		div_progress_message.style.visibility = "hidden";
 		dom_progress.style.visibility = "hidden";
 	}
 }
