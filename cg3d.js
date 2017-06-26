@@ -46,8 +46,15 @@ function init3d() {
 	m.perspective(90,canvas_3dcg.width/canvas_3dcg.height,0.1,100,pMatrix);
 	m.multiply(pMatrix,vMatrix,mvpMatrix);
 
+	var encoder = new GIFEncoder();
+	encoder.setRepeat(0);
+	encoder.setDelay(0);
+	encoder.setFrameRate(60);
+	encoder.setSize(canvas_3dcg.width, canvas_3dcg.height);
+
 	var count = 0;
 	(function() {
+		if(count == 0) encoder.start();
 		gl.clearColor(0.0,0.0,0.0,1.0);
 		gl.clearDepth(1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -60,7 +67,30 @@ function init3d() {
 		gl.drawArrays(gl.TRIANGLES,0,3);
 
 		gl.flush();
+		if(count<30)encoder.addFrame(gl);
 		count++;
+		if(count==30) {
+			encoder.finish();
+			var bin = new Uint8Array(encoder.stream().bin);
+			console.log(bin);
+			var blob = new Blob([bin.buffer],{type:"image/gif"});
+			console.log(blob);
+
+			var a = document.createElement("a");
+			a.href = URL.createObjectURL(blob);
+			a.targer = '_blank';
+			a.download = 'anime.gif';
+			a.click();
+
+			/*
+			var url = URL.createObjectURL(blob);
+			var image document.createElement("img");
+			image.src = url;
+			image.onload = function() {
+				URL.revokeObjectURL(url);
+			}
+			*/
+		}
 		setTimeout(arguments.callee,1000/60);
 	})();
 }
