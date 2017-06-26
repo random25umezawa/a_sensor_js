@@ -68,7 +68,6 @@ function init3d() {
 
 		gl.flush();
 		if(count<60)encoder.addFrame(gl);
-		count++;
 		if(count==60) {
 			encoder.finish();
 			var bin = new Uint8Array(encoder.stream().bin);
@@ -91,6 +90,7 @@ function init3d() {
 			}
 			*/
 		}
+		count++;
 		setTimeout(arguments.callee,1000/25);
 	})();
 }
