@@ -141,7 +141,6 @@ GIFEncoder = function() {
 		try {
 			if (!is_imageData) {
 				//image = im.getImageData(0, 0, im.canvas.width, im.canvas.height).data;
-				//image = new ImageData(new Uint8ClampedArray(im.toBlob()),im.canvas.width,im.canvas.height);
 
 				pixels = [];
 				new Uint8Array(1);
@@ -156,21 +155,7 @@ GIFEncoder = function() {
 						pixels[temp_pixels+2] = pixelValues[temp_pixelValues-2];
 					}
 				}
-				/*
-				for(var count = 0; count < maxCount; count++) {
-					var temp_pixel = count*3;
-					var temp_allmap = count*4;
-					pixels[temp_pixel] = pixelValues[temp_allmap];
-					pixels[temp_pixel+1] = pixelValues[temp_allmap+1];
-					pixels[temp_pixel+2] = pixelValues[temp_allmap+2];
-				}
-				*/
-				//console.log(rgba);
-				//console.log(new Uint8ClampedArray(rgba));
-				//image = new ImageData(new Uint8ClampedArray(rgba),im.canvas.width,im.canvas.height).data;
-				//console.log(image);
-
-				//image = new ImageData(im.canvas.width,im.canvas.height);
+				
 				if (!sizeSet) setSize(im.canvas.width, im.canvas.height);
 			} else {
 				if(im instanceof ImageData) {

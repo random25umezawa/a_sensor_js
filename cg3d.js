@@ -80,33 +80,11 @@ function init3d() {
 			a.targer = '_blank';
 			a.download = 'anime.gif';
 			a.click();
-
-			/*
-			var url = URL.createObjectURL(blob);
-			var image document.createElement("img");
-			image.src = url;
-			image.onload = function() {
-				URL.revokeObjectURL(url);
-			}
-			*/
 		}
 		count++;
 		setTimeout(arguments.callee,1000/25);
 	})();
 }
-
-/*
-out.writeUTFBytes("GIF89a")
-GIF89a
-
-	out.writeByte(0x21); // extension introducer
-	out.writeByte(0xf9); // GCE label
-	out.writeByte(4); // data block size
-
-out.writeByte(0x3b);
-0x3b
-*/
-
 
 function create_shader(script,type) {
 	var shader;
