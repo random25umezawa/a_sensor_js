@@ -67,9 +67,9 @@ function init3d() {
 		gl.drawArrays(gl.TRIANGLES,0,3);
 
 		gl.flush();
-		if(count<30)encoder.addFrame(gl);
+		if(count<5)encoder.addFrame(gl);
 		count++;
-		if(count==30) {
+		if(count==5) {
 			encoder.finish();
 			var bin = new Uint8Array(encoder.stream().bin);
 			console.log(bin);
@@ -91,7 +91,7 @@ function init3d() {
 			}
 			*/
 		}
-		setTimeout(arguments.callee,1000/60);
+		setTimeout(arguments.callee,1000/25);
 	})();
 }
 

@@ -140,7 +140,32 @@ GIFEncoder = function() {
 
 		try {
 			if (!is_imageData) {
-				image = im.getImageData(0, 0, im.canvas.width, im.canvas.height).data;
+				//image = im.getImageData(0, 0, im.canvas.width, im.canvas.height).data;
+				//image = new ImageData(new Uint8ClampedArray(im.toBlob()),im.canvas.width,im.canvas.height);
+
+				var rgba = [];
+				var block = 256;
+				for(var bx = 0; bx < im.canvas.width; bx += block) {
+					for(var by = 0; by < im.canvas.height; by += block) {
+						new Uint8Array(1);
+						var pixelValues = new Uint8Array(4*block*block);
+						im.readPixels(bx, by, bx+block, by+block, im.RGBA, im.UNSIGNED_BYTE, pixelValues);
+						for(var _x = 0; _x < block; _x++) {
+							for(var _y = 0; _y < block; _y++) {
+								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+0] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+0];
+								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+1] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+1];
+								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+2] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+2];
+								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+3] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+3];
+							}
+						}
+					}
+				}
+				console.log(rgba);
+				console.log(new Uint8ClampedArray(rgba));
+				image = new ImageData(new Uint8ClampedArray(rgba),im.canvas.width,im.canvas.height);
+				console.log(image);
+
+				//image = new ImageData(im.canvas.width,im.canvas.height);
 				if (!sizeSet) setSize(im.canvas.width, im.canvas.height);
 			} else {
 				if(im instanceof ImageData) {
