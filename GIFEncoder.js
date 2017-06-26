@@ -143,27 +143,32 @@ GIFEncoder = function() {
 				//image = im.getImageData(0, 0, im.canvas.width, im.canvas.height).data;
 				//image = new ImageData(new Uint8ClampedArray(im.toBlob()),im.canvas.width,im.canvas.height);
 
-				var rgba = [];
-				var block = 256;
-				for(var bx = 0; bx < im.canvas.width; bx += block) {
-					for(var by = 0; by < im.canvas.height; by += block) {
-						new Uint8Array(1);
-						var pixelValues = new Uint8Array(4*block*block);
-						im.readPixels(bx, by, bx+block, by+block, im.RGBA, im.UNSIGNED_BYTE, pixelValues);
-						for(var _x = 0; _x < block; _x++) {
-							for(var _y = 0; _y < block; _y++) {
-								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+0] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+0];
-								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+1] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+1];
-								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+2] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+2];
-								rgba[(bx+_x)*4+(by+_y)*4*im.canvas.width+3] = pixelValues[(bx+_x)*4+(by+_y)*4*im.canvas.width+3];
-							}
-						}
+				pixels = [];
+				new Uint8Array(1);
+				var pixelValues = new Uint8Array(4*im.canvas.width*im.canvas.height);
+				im.readPixels(0, 0, im.canvas.width, im.canvas.height, im.RGBA, im.UNSIGNED_BYTE, pixelValues);
+				for(var _x = 0; _x < im.canvas.width; _x++) {
+					for(var _y = 0; _y < im.canvas.height; _y++) {
+						var temp_pixels = _x*3+_y*im.canvas.width*3;
+						var temp_pixelValues = _x*4+(im.canvas.height-_y)*im.canvas.width*4;
+						pixels[temp_pixels] = pixelValues[temp_pixelValues-4];
+						pixels[temp_pixels+1] = pixelValues[temp_pixelValues-3];
+						pixels[temp_pixels+2] = pixelValues[temp_pixelValues-2];
 					}
 				}
+				/*
+				for(var count = 0; count < maxCount; count++) {
+					var temp_pixel = count*3;
+					var temp_allmap = count*4;
+					pixels[temp_pixel] = pixelValues[temp_allmap];
+					pixels[temp_pixel+1] = pixelValues[temp_allmap+1];
+					pixels[temp_pixel+2] = pixelValues[temp_allmap+2];
+				}
+				*/
 				//console.log(rgba);
 				//console.log(new Uint8ClampedArray(rgba));
-				image = new ImageData(new Uint8ClampedArray(rgba),im.canvas.width,im.canvas.height).data;
-				console.log(image);
+				//image = new ImageData(new Uint8ClampedArray(rgba),im.canvas.width,im.canvas.height).data;
+				//console.log(image);
 
 				//image = new ImageData(im.canvas.width,im.canvas.height);
 				if (!sizeSet) setSize(im.canvas.width, im.canvas.height);
@@ -187,7 +192,7 @@ GIFEncoder = function() {
 					ok=false;
 				}
 			}
-			getImagePixels(); // convert to correct format if necessary
+			//getImagePixels(); // convert to correct format if necessary
 			analyzePixels(); // build color table & map pixels
 
 			if (firstFrame) {
