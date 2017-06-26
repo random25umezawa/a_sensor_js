@@ -60,16 +60,16 @@ function init3d() {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		m.identity(mMatrix);
-		m.rotate(mMatrix,1/25,[0,1,0],mMatrix);
+		m.rotate(mMatrix,Math.PI/30,[0,1,0],mMatrix);
 		m.multiply(mvpMatrix,mMatrix,mvpMatrix);
 		var uniLocation = gl.getUniformLocation(program,"mvpMatrix");
 		gl.uniformMatrix4fv(uniLocation,false,mvpMatrix);
 		gl.drawArrays(gl.TRIANGLES,0,3);
 
 		gl.flush();
-		if(count<5)encoder.addFrame(gl);
+		if(count<60)encoder.addFrame(gl);
 		count++;
-		if(count==5) {
+		if(count==60) {
 			encoder.finish();
 			var bin = new Uint8Array(encoder.stream().bin);
 			console.log(bin);
@@ -94,6 +94,19 @@ function init3d() {
 		setTimeout(arguments.callee,1000/25);
 	})();
 }
+
+/*
+out.writeUTFBytes("GIF89a")
+GIF89a
+
+	out.writeByte(0x21); // extension introducer
+	out.writeByte(0xf9); // GCE label
+	out.writeByte(4); // data block size
+
+out.writeByte(0x3b);
+0x3b
+*/
+
 
 function create_shader(script,type) {
 	var shader;

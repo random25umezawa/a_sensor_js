@@ -160,9 +160,9 @@ GIFEncoder = function() {
 						}
 					}
 				}
-				console.log(rgba);
-				console.log(new Uint8ClampedArray(rgba));
-				image = new ImageData(new Uint8ClampedArray(rgba),im.canvas.width,im.canvas.height);
+				//console.log(rgba);
+				//console.log(new Uint8ClampedArray(rgba));
+				image = new ImageData(new Uint8ClampedArray(rgba),im.canvas.width,im.canvas.height).data;
 				console.log(image);
 
 				//image = new ImageData(im.canvas.width,im.canvas.height);
