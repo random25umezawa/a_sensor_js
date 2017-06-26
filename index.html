@@ -1,7 +1,6 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<!--link rel="stylesheet" href="../style/main.css"!-->
 	<title>加速度ツール</title>
 	<style>
 	*{
@@ -17,12 +16,14 @@
 		margin: 5px;
 	}
 	</style>
+	<script src="minMatrix.js"></script>
 </head>
 <body>
 	<button id="timerbutton" style="width:400px; height:80px;">計測開始</button><br>
 	x:<span id="span_x"> 0.000</span><br>
 	y:<span id="span_y"> 0.000</span><br>
 	z:<span id="span_z"> 0.000</span><br>
+	<canvas id="canvas_3dcg" width="500" height="300"></canvas>
 	<div class="func">
 		<button onclick="download();" style="width:300px; height:80px;">csv取得</button><br>
 		filename:<input id="filename" style="width:12em;">
@@ -91,6 +92,8 @@ window.onload = function() {
 	div_progress_message.style.visibility = "hidden";
 	dom_progress.style.visibility = "hidden";
 	g = canvas.getContext("2d");
+
+	init3d();
 
 	timerbutton.onclick = function() {
 		if(sensor_flag) {
@@ -217,4 +220,7 @@ function fixNumber(_num) {
 }
 
 </script>
+
+<script src="./cg3d.js"></script>
+
 </html>
